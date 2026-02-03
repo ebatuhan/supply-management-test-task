@@ -89,7 +89,7 @@ public class SupplierServiceImpl implements SupplierService {
                     rootCause.getMessage() != null &&
                     rootCause.getMessage()
                             .toLowerCase()
-                            .contains("unqiue")) {
+                            .contains("unique")) {
                 throw new DuplicateEntityException("Supplier already exists.");
             }
 

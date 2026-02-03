@@ -3,6 +3,7 @@ package com.batu.supply_management_test_task.controller;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,5 +39,10 @@ public class SupplierController {
     @PatchMapping("/{supplierId}")
     public ResponseEntity<SupplierDTO> updateSupplierById(@PathVariable UUID supplierId, @RequestBody SupplierRequestDTO request){
         return ResponseEntity.ok(supplierService.updateSupplierById(supplierId, request));
+    }
+
+    @DeleteMapping("/{supplierId}")
+    public ResponseEntity<Boolean> removeSupplierById(@PathVariable UUID supplierId){
+        return ResponseEntity.ok(supplierService.removeSupplierById(supplierId));
     }
 }
