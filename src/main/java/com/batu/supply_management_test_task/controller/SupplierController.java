@@ -43,6 +43,7 @@ public class SupplierController {
 
     @DeleteMapping("/{supplierId}")
     public ResponseEntity<Boolean> removeSupplierById(@PathVariable UUID supplierId){
-        return ResponseEntity.ok(supplierService.removeSupplierById(supplierId));
+        supplierService.removeSupplierById(supplierId);
+        return ResponseEntity.noContent().build();
     }
 }
