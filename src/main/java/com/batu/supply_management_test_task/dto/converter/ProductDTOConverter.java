@@ -11,7 +11,7 @@ public class ProductDTOConverter {
         return ProductDTO.builder()
                 .productId(from.getProductId())
                 .productName(from.getProductName())
-                .ProductType(from.getProductType())
+                .productType(from.getProductType())
                 .build();
     }
 }
