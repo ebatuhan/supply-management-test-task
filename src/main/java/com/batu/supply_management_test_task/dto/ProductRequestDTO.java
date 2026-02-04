@@ -12,5 +12,5 @@ public record ProductRequestDTO(
         @Size(max = 100, message = "Product type must not exceed 100 characters")
         String productType
 ) {
-
+    
 }
