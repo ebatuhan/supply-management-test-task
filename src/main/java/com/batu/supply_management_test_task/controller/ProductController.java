@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import com.batu.supply_management_test_task.dto.ProductDTO;
 import com.batu.supply_management_test_task.dto.ProductRequestDTO;
+import com.batu.supply_management_test_task.dto.ProductUpdateDTO;
 import com.batu.supply_management_test_task.service.ProductService;
 
 @RestController
@@ -40,7 +41,7 @@ public class ProductController {
 
     @PatchMapping("/{productId}")
     public ResponseEntity<ProductDTO> updateProductById(@PathVariable UUID productId,
-            @Valid @RequestBody ProductRequestDTO request) {
+            @Valid @RequestBody ProductUpdateDTO request) {
         return ResponseEntity.ok(productService.updateProductById(productId, request));
     }
 

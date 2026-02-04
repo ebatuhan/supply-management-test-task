@@ -1,12 +1,12 @@
 package com.batu.supply_management_test_task.dto;
 
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.AssertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
-
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
@@ -22,11 +22,15 @@ public record PriceOfferRequestDTO(
         BigDecimal validPricePerKg,
 
         @NotNull(message = "Valid from date must not be null")
-        @FutureOrPresent(message = "Valid from date must be today or in the future")
         LocalDate validFrom,
 
         @NotNull(message = "Valid to date must not be null")
         LocalDate validTo
 ) {
 
+    @AssertTrue(message = "Invalid date range.")
+    private boolean isValidDateRange() {
+        if (validFrom == null || validTo == null) return true; 
+        return validFrom.isBefore(validTo);
+    }
 }

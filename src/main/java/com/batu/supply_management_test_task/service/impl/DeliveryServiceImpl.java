@@ -1,10 +1,8 @@
 package com.batu.supply_management_test_task.service.impl;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.batu.supply_management_test_task.dto.DeliveryDTO;
 import com.batu.supply_management_test_task.dto.DeliveryRequestDTO;
+import com.batu.supply_management_test_task.dto.DeliveryUpdateDTO;
 import com.batu.supply_management_test_task.dto.converter.DeliveryDTOConverter;
 import com.batu.supply_management_test_task.entity.Delivery;
 import com.batu.supply_management_test_task.entity.DeliveryItem;
@@ -58,7 +57,6 @@ public class DeliveryServiceImpl implements DeliveryService {
         var supplier = supplierService.readById(request.supplierId());
 
         delivery.setSupplier(supplier);
-        
 
         request.deliveryItems()
                 .forEach(itemDto -> {
@@ -78,8 +76,6 @@ public class DeliveryServiceImpl implements DeliveryService {
 
                     delivery.getDeliveryItems().add(deliveryItem);
                 });
-
-        delivery.setDeliveryHash(calculateDeliveryHash(delivery));
 
         Delivery savedDelivery;
         try {
@@ -102,21 +98,65 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     }
 
+    @Override
+    public DeliveryDTO updateDeliveryById(UUID deliveryId, DeliveryUpdateDTO updateDTO) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery not found with id: " + deliveryId));
 
-    //Это для того чтобы не дублировать поставки.
-private int calculateDeliveryHash(Delivery delivery) {
-    List<Object> hashValues = new ArrayList<>();
+        Optional.ofNullable(updateDTO.supplierId()).ifPresent(id -> {
+            var supplier = supplierService.readById(id);
+            delivery.setSupplier(supplier);
+        });
 
-    hashValues.add(delivery.getDeliveryDate());
-    hashValues.add(delivery.getSupplier().getSupplierId());
+        delivery.setDeliveryDate(
+                Optional.ofNullable(updateDTO.deliveryDate()).orElse(delivery.getDeliveryDate()));
 
-    delivery.getDeliveryItems().stream()
-            .sorted(Comparator.comparing(item -> item.getProduct().getProductId()))
-            .forEach(item -> {
-                hashValues.add(item.getProduct().getProductId());
-                hashValues.add(item.getWeightInKg().stripTrailingZeros()); 
+        Optional.ofNullable(updateDTO.deliveryItems()).ifPresent(items -> {
+            delivery.getDeliveryItems().clear();
+
+            items.forEach(itemDto -> {
+                Product product = productService.readProductById(itemDto.productId());
+                BigDecimal pricePerKg = priceOfferService.findValidPricePerKg(
+                        delivery.getSupplier(),
+                        product,
+                        delivery.getDeliveryDate());
+
+                DeliveryItem deliveryItem = DeliveryItem.builder()
+                        .delivery(delivery)
+                        .product(product)
+                        .weightInKg(itemDto.weightInKg())
+                        .pricePerKg(pricePerKg)
+                        .build();
+
+                delivery.getDeliveryItems().add(deliveryItem);
             });
+        });
 
-    return Objects.hash(hashValues.toArray());
-}
+        try {
+            Delivery updatedDelivery = deliveryRepository.save(delivery);
+            return deliveryDTOConverter.convert(updatedDelivery);
+        } catch (DataIntegrityViolationException ex) {
+            Throwable rootCause = ex.getRootCause();
+            if (rootCause != null && rootCause.getMessage() != null
+                    && rootCause.getMessage().toLowerCase().contains("unique")) {
+                throw new DuplicateEntityException(
+                        "A delivery already exists for this supplier on the specified date.");
+            }
+            throw ex;
+        }
+    }
+
+    @Override
+    public Boolean deleteDeliveryById(UUID deliveryId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery not found with id: " + deliveryId));
+
+        try {
+            deliveryRepository.delete(delivery);
+            return true;
+        } catch (DataIntegrityViolationException ex) {
+
+            throw new IllegalStateException("Cannot delete delivery due to database constraints.", ex);
+        }
+    }
 }

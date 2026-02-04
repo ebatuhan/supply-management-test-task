@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import com.batu.supply_management_test_task.dto.SupplierDTO;
 import com.batu.supply_management_test_task.dto.SupplierRequestDTO;
+import com.batu.supply_management_test_task.dto.SupplierUpdateDTO;
 import com.batu.supply_management_test_task.service.SupplierService;
 
 @RestController
@@ -40,7 +41,7 @@ public class SupplierController {
     }
 
     @PatchMapping("/{supplierId}")
-    public ResponseEntity<SupplierDTO> updateSupplierById(@PathVariable UUID supplierId, @Valid @RequestBody SupplierRequestDTO request){
+    public ResponseEntity<SupplierDTO> updateSupplierById(@PathVariable UUID supplierId, @Valid @RequestBody SupplierUpdateDTO request){
         return ResponseEntity.ok(supplierService.updateSupplierById(supplierId, request));
     }
 

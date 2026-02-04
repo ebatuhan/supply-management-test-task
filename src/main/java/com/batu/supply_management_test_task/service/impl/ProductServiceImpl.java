@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.batu.supply_management_test_task.dto.ProductDTO;
 import com.batu.supply_management_test_task.dto.ProductRequestDTO;
+import com.batu.supply_management_test_task.dto.ProductUpdateDTO;
 import com.batu.supply_management_test_task.dto.converter.ProductDTOConverter;
 import com.batu.supply_management_test_task.entity.Product;
 import com.batu.supply_management_test_task.exception.ResourceNotFoundException;
@@ -49,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProductById(UUID productId, ProductRequestDTO request) {
+    public ProductDTO updateProductById(UUID productId, ProductUpdateDTO request) {
         var product = readProductById(productId);
 
         product.setProductName(

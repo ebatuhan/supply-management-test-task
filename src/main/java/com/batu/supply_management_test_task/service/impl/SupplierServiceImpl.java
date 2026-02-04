@@ -10,6 +10,7 @@ import com.batu.supply_management_test_task.client.FnsApiClient;
 import com.batu.supply_management_test_task.dto.FnsResponseDTO;
 import com.batu.supply_management_test_task.dto.SupplierDTO;
 import com.batu.supply_management_test_task.dto.SupplierRequestDTO;
+import com.batu.supply_management_test_task.dto.SupplierUpdateDTO;
 import com.batu.supply_management_test_task.dto.converter.SupplierDTOConverter;
 import com.batu.supply_management_test_task.entity.Supplier;
 import com.batu.supply_management_test_task.exception.DuplicateEntityException;
@@ -45,7 +46,7 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public SupplierDTO updateSupplierById(UUID supplierId, SupplierRequestDTO request) {
+    public SupplierDTO updateSupplierById(UUID supplierId, SupplierUpdateDTO request) {
         var supplier = readById(supplierId);
 
         supplier.setSupplierName(

@@ -25,6 +25,7 @@ public class ReportServiceImpl implements ReportService {
 
     private final DeliveryRepository deliveryRepository;
     private final FileExportFactory exportFactory;
+
     public ReportServiceImpl(DeliveryRepository deliveryRepository, FileExportFactory exportFactory) {
         this.deliveryRepository = deliveryRepository;
         this.exportFactory = exportFactory;
@@ -40,8 +41,11 @@ public class ReportServiceImpl implements ReportService {
         BigDecimal grandTotalCost = BigDecimal.ZERO;
 
         for (DeliveryReportProjection p : projections) {
-            grandTotalWeightInKg = grandTotalWeightInKg.add(p.getTotalWeight());
-            grandTotalCost = grandTotalCost.add(p.getTotalCost());
+            BigDecimal weight = p.getTotalWeightInKg() != null ? p.getTotalWeightInKg() : BigDecimal.ZERO;
+            BigDecimal cost = p.getTotalCost() != null ? p.getTotalCost() : BigDecimal.ZERO;
+
+            grandTotalWeightInKg = grandTotalWeightInKg.add(weight);
+            grandTotalCost = grandTotalCost.add(cost);
 
             ProductReportDTO productReport = productMap.computeIfAbsent(p.getProductId(),
                     id -> ProductReportDTO.builder()
@@ -54,15 +58,15 @@ public class ReportServiceImpl implements ReportService {
 
             productReport.supplies().add(SupplierReportDTO.builder()
                     .supplierName(p.getSupplierName())
-                    .totalWeightInKg(p.getTotalWeight())
-                    .totalCost(p.getTotalCost())
+                    .totalWeightInKg(weight)
+                    .totalCost(cost)
                     .build());
 
             productReport = ProductReportDTO.builder()
                     .productName(productReport.productName())
                     .productType(productReport.productType())
-                    .productTotalWeight(productReport.productTotalWeight().add(p.getTotalWeight()))
-                    .productTotalCost(productReport.productTotalCost().add(p.getTotalCost()))
+                    .productTotalWeight(productReport.productTotalWeight().add(weight))
+                    .productTotalCost(productReport.productTotalCost().add(cost))
                     .supplies(productReport.supplies())
                     .build();
 

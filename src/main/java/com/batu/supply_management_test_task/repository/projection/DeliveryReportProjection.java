@@ -9,6 +9,6 @@ public interface DeliveryReportProjection {
     UUID getProductId();
     String getProductName();
     String getProductType();
-    BigDecimal getTotalWeight();
+    BigDecimal getTotalWeightInKg();
     BigDecimal getTotalCost();
 }

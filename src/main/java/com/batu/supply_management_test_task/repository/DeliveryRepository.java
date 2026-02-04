@@ -21,13 +21,9 @@ public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
                     di.product.productName AS productName,
                     di.product.productType AS productType,
                     SUM(di.weightInKg) AS totalWeightInKg,
-                    SUM(di.weightInKg * po.validPricePerKg) AS totalCost
+                    SUM(di.weightInKg * di.pricePerKg) AS totalCost
                 FROM DeliveryItem di
                 JOIN di.delivery d
-                JOIN PriceOffer po
-                    ON po.product = di.product
-                    AND po.supplier = d.supplier
-                    AND d.deliveryDate BETWEEN po.validFrom AND po.validTo
                 WHERE d.deliveryDate BETWEEN :startDate AND :endDate
                 GROUP BY d.supplier.supplierId, d.supplier.supplierName,
                          di.product.productId, di.product.productName, di.product.productType
