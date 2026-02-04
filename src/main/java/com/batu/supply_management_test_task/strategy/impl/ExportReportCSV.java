@@ -23,7 +23,7 @@ public class ExportReportCSV implements FileExportStrategy {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                 PrintWriter writer = new PrintWriter(out)) {
 
-            writer.println("Product,Type,Total Weight,Total Cost");
+            writer.println("Product,Type,Total Weight(),Total Cost");
             for (ProductReportDTO product : deliveryReport.productReports()) {
                 writer.printf("%s,%s,%.2f,%.2f%n",
                         product.productName(),
@@ -32,17 +32,17 @@ public class ExportReportCSV implements FileExportStrategy {
                         product.productTotalCost());
             }
             writer.printf("Grand Total,,%.2f,%.2f%n%n",
-                    deliveryReport.grandTotalWeight(),
+                    deliveryReport.grandTotalWeightInKg(),
                     deliveryReport.grandTotalCost());
 
-            writer.println("Product,Type,Supplier,Weight,Cost");
+            writer.println("Product,Type,Supplier,Weight(Kg),Cost");
             for (ProductReportDTO product : deliveryReport.productReports()) {
                 for (SupplierReportDTO supply : product.supplies()) {
                     writer.printf("%s,%s,%s,%.2f,%.2f%n",
                             product.productName(),
                             product.productType(),
                             supply.supplierName(),
-                            supply.totalWeight(),
+                            supply.totalWeightInKg(),
                             supply.totalCost());
                 }
             }

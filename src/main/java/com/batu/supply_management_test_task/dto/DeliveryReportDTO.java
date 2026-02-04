@@ -8,6 +8,6 @@ import java.util.List;
 @Builder
 public record DeliveryReportDTO (
         List<ProductReportDTO> productReports,
-        BigDecimal grandTotalWeight,
+        BigDecimal grandTotalWeightInKg,
         BigDecimal grandTotalCost
 ) {}

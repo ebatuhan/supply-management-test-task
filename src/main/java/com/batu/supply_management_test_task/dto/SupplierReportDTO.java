@@ -7,6 +7,6 @@ import lombok.Builder;
 @Builder
 public record SupplierReportDTO(
         String supplierName,
-        BigDecimal totalWeight,
+        BigDecimal totalWeightInKg,
         BigDecimal totalCost) {
 }

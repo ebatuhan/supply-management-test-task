@@ -6,5 +6,5 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record DeliveryItemDTO(UUID deliveryItemId, UUID productId, String productName, String productType,BigDecimal pricePerKg, BigDecimal weight) {
+public record DeliveryItemDTO(UUID deliveryItemId, UUID productId, String productName, String productType,BigDecimal pricePerKg, BigDecimal weightInKg) {
 }

@@ -15,7 +15,7 @@ public class DeliveryItemDTOConverter {
         return DeliveryItemDTO.builder()
                 .deliveryItemId(from.getDeliveryItemId())
                 .pricePerKg(from.getPricePerKg())
-                .weight(from.getWeight())
+                .weightInKg(from.getWeightInKg())
                 .productName(product.getProductName())
                 .productType(product.getProductType())
                 .productId(product.getProductId())

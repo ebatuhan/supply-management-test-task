@@ -6,6 +6,6 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record DeliveryItemRequestDTO(UUID productId,BigDecimal weight) {
+public record DeliveryItemRequestDTO(UUID productId,BigDecimal weightInKg) {
 
 }

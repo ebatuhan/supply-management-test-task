@@ -36,11 +36,11 @@ public class ReportServiceImpl implements ReportService {
         List<DeliveryReportProjection> projections = deliveryRepository.getReport(startDate, endDate);
 
         Map<UUID, ProductReportDTO> productMap = new LinkedHashMap<>();
-        BigDecimal grandTotalWeight = BigDecimal.ZERO;
+        BigDecimal grandTotalWeightInKg = BigDecimal.ZERO;
         BigDecimal grandTotalCost = BigDecimal.ZERO;
 
         for (DeliveryReportProjection p : projections) {
-            grandTotalWeight = grandTotalWeight.add(p.getTotalWeight());
+            grandTotalWeightInKg = grandTotalWeightInKg.add(p.getTotalWeight());
             grandTotalCost = grandTotalCost.add(p.getTotalCost());
 
             ProductReportDTO productReport = productMap.computeIfAbsent(p.getProductId(),
@@ -54,7 +54,7 @@ public class ReportServiceImpl implements ReportService {
 
             productReport.supplies().add(SupplierReportDTO.builder()
                     .supplierName(p.getSupplierName())
-                    .totalWeight(p.getTotalWeight())
+                    .totalWeightInKg(p.getTotalWeight())
                     .totalCost(p.getTotalCost())
                     .build());
 
@@ -71,7 +71,7 @@ public class ReportServiceImpl implements ReportService {
 
         return DeliveryReportDTO.builder()
                 .productReports(new ArrayList<>(productMap.values()))
-                .grandTotalWeight(grandTotalWeight)
+                .grandTotalWeightInKg(grandTotalWeightInKg)
                 .grandTotalCost(grandTotalCost)
                 .build();
     }

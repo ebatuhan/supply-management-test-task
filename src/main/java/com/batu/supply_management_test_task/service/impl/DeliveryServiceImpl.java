@@ -67,12 +67,12 @@ public class DeliveryServiceImpl implements DeliveryService {
                     BigDecimal pricePerKg = priceOfferService.findValidPricePerKg(supplier, product,
                             delivery.getDeliveryDate());
 
-                    BigDecimal weight = itemDto.weight();
+                    BigDecimal weightInKg = itemDto.weightInKg();
 
                     DeliveryItem deliveryItem = DeliveryItem.builder()
                             .delivery(delivery)
                             .product(product)
-                            .weight(weight)
+                            .weightInKg(weightInKg)
                             .pricePerKg(pricePerKg)
                             .build();
 
@@ -102,6 +102,8 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     }
 
+
+    //Это для того чтобы не дублировать поставки.
 private int calculateDeliveryHash(Delivery delivery) {
     List<Object> hashValues = new ArrayList<>();
 
@@ -112,8 +114,7 @@ private int calculateDeliveryHash(Delivery delivery) {
             .sorted(Comparator.comparing(item -> item.getProduct().getProductId()))
             .forEach(item -> {
                 hashValues.add(item.getProduct().getProductId());
-                System.out.println("Weight: " + item.getWeight().stripTrailingZeros());
-                hashValues.add(item.getWeight().stripTrailingZeros()); 
+                hashValues.add(item.getWeightInKg().stripTrailingZeros()); 
             });
 
     return Objects.hash(hashValues.toArray());

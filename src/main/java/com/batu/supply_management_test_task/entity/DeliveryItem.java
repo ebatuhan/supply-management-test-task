@@ -37,5 +37,5 @@ public class DeliveryItem {
     private BigDecimal pricePerKg;
 
     @Column(nullable = false)
-    private BigDecimal weight;
+    private BigDecimal weightInKg;
 }
