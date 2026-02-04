@@ -3,7 +3,7 @@ spring:
     name: supply-management-test-task
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/supply_management}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/supply_management}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -19,3 +19,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+fns:
+  api:
+    key: 8e3746a6646a194815636ba3f92fc07840e76470

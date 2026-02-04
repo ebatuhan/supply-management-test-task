@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.batu.supply_management_test_task.client.FnsApiClient;
+import com.batu.supply_management_test_task.dto.FnsResponseDTO;
 import com.batu.supply_management_test_task.dto.SupplierDTO;
 import com.batu.supply_management_test_task.dto.SupplierRequestDTO;
 import com.batu.supply_management_test_task.dto.converter.SupplierDTOConverter;
@@ -20,10 +22,13 @@ public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
     private final SupplierDTOConverter supplierDTOConverter;
+    private final FnsApiClient fnsApiClient;
 
-    public SupplierServiceImpl(SupplierRepository supplierRepository, SupplierDTOConverter supplierDTOConverter) {
+    public SupplierServiceImpl(SupplierRepository supplierRepository, SupplierDTOConverter supplierDTOConverter,
+            FnsApiClient fnsApiClient) {
         this.supplierRepository = supplierRepository;
         this.supplierDTOConverter = supplierDTOConverter;
+        this.fnsApiClient = fnsApiClient;
     }
 
     @Override
@@ -45,7 +50,7 @@ public class SupplierServiceImpl implements SupplierService {
 
         supplier.setSupplierName(
                 Optional.ofNullable(request.supplierName()).orElse(supplier.getSupplierName()));
-       
+
         supplier.setTaxIdNumber(
                 Optional.ofNullable(request.taxIdNumber()).orElse(supplier.getTaxIdNumber()));
 
@@ -66,12 +71,14 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public SupplierDTO createSupplier(SupplierRequestDTO request) {
+
         Supplier supplierToAdd = Supplier.builder()
-                .supplierName(request.supplierName())
+                .supplierName(!request.supplierName().isBlank()
+                        ? request.supplierName()
+                        : fetchSupplierNameByTaxIdNumber(request.taxIdNumber()))
                 .taxIdNumber(request.taxIdNumber())
                 .build();
 
-        
         // можно было бы сначала проверить,
         // а потом сохранить. тут состояние гонки не 0 но маловероятно...
 
@@ -95,4 +102,16 @@ public class SupplierServiceImpl implements SupplierService {
         }
     }
 
+    private String fetchSupplierNameByTaxIdNumber(String taxIdNumber) {
+        FnsResponseDTO response = fnsApiClient.getCompanyInfo(taxIdNumber);
+
+        if (response.items().isEmpty())
+            throw new ResourceNotFoundException(
+                    "Such supplier with this tax number is not found. Add supplier manually.");
+
+        return response.items()
+                .getFirst()
+                .company()
+                .fullName();
+    }
 }
