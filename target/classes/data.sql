@@ -1,3 +1,17 @@
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+ALTER TABLE price_offer
+DROP CONSTRAINT IF EXISTS price_offer_no_overlap;
+
+ALTER TABLE price_offer
+ADD CONSTRAINT price_offer_no_overlap
+EXCLUDE USING GIST (
+    supplier_id WITH =,
+    product_id WITH =,
+    daterange(valid_from, valid_to, '[]') WITH &&
+);
+
+
 INSERT INTO supplier (supplier_id, supplier_name, supplier_type, tax_id_number) VALUES ('f5dc9d88-52e1-400a-9e3b-368f6f54f346','Supplier_1','International','8468853533');
 INSERT INTO supplier (supplier_id, supplier_name, supplier_type, tax_id_number) VALUES ('fb5d328b-82a8-427a-bded-db9f02048aaf','Supplier_2','Local','3767796412');
 INSERT INTO supplier (supplier_id, supplier_name, supplier_type, tax_id_number) VALUES ('144f6a64-4d8f-40b5-bc3e-438e7382837c','Supplier_3','International','8443531546');
@@ -56,3 +70,4 @@ INSERT INTO delivery_item (delivery_item_id, product_id, delivery_id, price_per_
 INSERT INTO delivery_item (delivery_item_id, product_id, delivery_id, price_per_kg, weight) VALUES ('dea79509-33ec-4b41-8436-97126727deef','b00af989-953b-40f9-8bd7-dfa81fcee864','b65d737d-bb25-408c-a019-368377addee2',29.29,217.81);
 INSERT INTO delivery_item (delivery_item_id, product_id, delivery_id, price_per_kg, weight) VALUES ('6ab24d1b-88d2-417f-a8c0-d943a6b0156c','de3736a6-77d6-4e89-a58a-cee385fa01f4','018e5f3c-b533-4f4f-a0fa-219a68dd07de',19.67,449.65);
 INSERT INTO delivery_item (delivery_item_id, product_id, delivery_id, price_per_kg, weight) VALUES ('3c4097b5-d3fa-4e84-ba07-9d00eeeec4fa','b00af989-953b-40f9-8bd7-dfa81fcee864','018e5f3c-b533-4f4f-a0fa-219a68dd07de',45.09,319.91);
+

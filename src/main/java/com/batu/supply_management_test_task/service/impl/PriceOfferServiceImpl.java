@@ -12,6 +12,7 @@ import com.batu.supply_management_test_task.dto.converter.PriceOfferDTOConverter
 import com.batu.supply_management_test_task.entity.PriceOffer;
 import com.batu.supply_management_test_task.entity.Product;
 import com.batu.supply_management_test_task.entity.Supplier;
+import com.batu.supply_management_test_task.exception.DuplicateEntityException;
 import com.batu.supply_management_test_task.exception.ResourceNotFoundException;
 import com.batu.supply_management_test_task.repository.PriceOfferRepository;
 import com.batu.supply_management_test_task.service.PriceOfferService;
@@ -47,8 +48,17 @@ public class PriceOfferServiceImpl implements PriceOfferService {
 
     @Override
     public PriceOfferDTO createPriceOffer(PriceOfferRequestDTO request) {
+
         Supplier supplier = supplierService.readById(request.supplierId());
         Product product = productService.readProductById(request.productId());
+
+        if (priceOfferRepository.isValidIntervalOverlaps(
+                supplier,
+                product,
+                request.validFrom(),
+                request.validTo())) {
+                    throw new DuplicateEntityException("Given valid interval overlaps.");
+                }
 
         PriceOffer priceOffer = PriceOffer.builder()
                 .product(product)
