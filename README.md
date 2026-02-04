@@ -11,3 +11,103 @@
 1. Данные приложения должны сохранятся в БД путем формирования таблиц из объектов Backend (СУБД PostgreSQL).  
 2. Backend – Java 17+, Spring Boot 3, Spring Data JPA (Hibernate). Требования задачи реализуются на уровне API, фронтенд необязателен.  
 3. Нам важно получить исходные коды программы + работающее мини приложение. Выложить все файлы в GitHub или GitLab.  
+
+---
+
+## Краткое описание решения
+
+### Принятые решения и отличия от условия
+- **Поставщики и продукты**: вместо жёстко зашитых 3 поставщиков и 2×2 типов продуктов сделаны полноценные CRUD‑эндпоинты для:
+  - **поставщиков** (`/api/v1/supplier`)
+  - **продуктов** (`/api/v1/product`)
+- **Имя поставщика по ИНН**: если при создании поставщика поле `supplierName` пустое/пробельное, сервис:
+  - запрашивает данные во внешнем API ФНС по ИНН (`taxIdNumber`)
+  - берёт полное наименование компании из ответа и сохраняет его как `supplierName`
+- **Отчёт**:
+  - доступен response (`GET /api/v1/report`)
+  - и как **CSV‑файл** (`GET /api/v1/report/export?fileType=csv`)
+
+### Основные сущности
+- **Supplier**: поставщик (id, имя, ИНН, уникальный ИНН).
+- **Product**: продукт (id, название, тип: груша/яблоко и т.п.).
+- **PriceOffer**: ценовое предложение поставщика на продукт с периодом действия.
+- **Delivery**: поставка от поставщика в дату, содержит набор **DeliveryItem**.
+- **DeliveryItem**: строка поставки (продукт, вес в кг, фактическая цена за кг на дату поставки).
+
+### Обзор сервисов
+- **SupplierService**: CRUD по поставщикам, интеграция с ФНС при пустом имени.
+- **ProductService**: CRUD по продуктам.
+- **PriceOfferService**: создание ценовых предложений, поиск действующей цены по дате.
+- **DeliveryService**: создание поставки:
+  - подтягивает действующую цену из `PriceOffer`
+  - считает хэш поставки, чтобы не допускать дублей.
+- **ReportService**: строит агрегированный отчёт по периодам и экспортирует его через стратегии (`FileExportStrategy`).
+
+---
+
+## Как использовать API
+
+Все эндпоинты начинаются с префикса ` /api/v1`.
+
+### Поставщики (`/supplier`)
+- **POST `/api/v1/supplier`**  
+  - **Вход**: `SupplierRequestDTO { supplierName, taxIdNumber }`  
+  - Если `supplierName` пустой → имя берётся из внешнего API ФНС по `taxIdNumber`.  
+  - **Выход**: `SupplierDTO` (id, имя, ИНН).
+- **GET `/api/v1/supplier/{supplierId}`** – получить поставщика по id.  
+- **PATCH `/api/v1/supplier/{supplierId}`** – частичное обновление имени/ИНН.  
+- **DELETE `/api/v1/supplier/{supplierId}`** – удалить поставщика.
+
+### Продукты (`/product`)
+- **POST `/api/v1/product`** – создать продукт (`ProductRequestDTO { productName, productType }`).  
+- **GET `/api/v1/product/{productId}`** – получить продукт.  
+- **PATCH `/api/v1/product/{productId}`** – частичное обновление.  
+- **DELETE `/api/v1/product/{productId}`** – удалить.
+
+### Ценовые предложения (`/price-offer`)
+- **POST `/api/v1/price-offer`**  
+  - **Вход**: `PriceOfferRequestDTO { supplierId, productId, validPricePerKg, validFrom, validTo }`  
+  - Проверяется пересечение периодов; при пересечении выбрасывается ошибка.  
+  - **Выход**: `PriceOfferDTO` с сохранённым предложением.
+- **GET `/api/v1/price-offer/{priceOfferId}`** – получить ценовое предложение по id.
+
+### Поставки (`/delivery`)
+- **POST `/api/v1/delivery`**  
+  - **Вход**: `DeliveryRequestDTO { supplierId, deliveryDate, deliveryItems[] }`, где `deliveryItems` содержит `{ productId, weightInKg }`.  
+  - Для каждой строки подбирается действующая цена из `PriceOffer` на дату `deliveryDate`.  
+  - **Выход**: `DeliveryDTO` с рассчитанными позициями.
+- **GET `/api/v1/delivery/{deliveryId}`** – получить поставку по id.
+
+### Отчёты (`/report`)
+- **GET `/api/v1/report?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`**  
+  - **Выход**: `DeliveryReportDTO`:
+    - список продуктов с суммарным весом/стоимостью по каждому
+    - разбивка по поставщикам внутри продукта
+    - общие итоги по весу и сумме.
+- **GET `/api/v1/report/export?startDate=...&endDate=...&fileType=csv`**  
+  - **Выход**: `Content-Disposition: attachment; filename="..."`, тело – CSV‑файл с тем же содержимым, что и JSON‑отчёт.
+
+---
+
+## Внешний API ФНС
+
+- Используется клиент `FnsApiClient` (OpenFeign).
+- Запрос происходит только при создании поставщика, если имя не задано.
+- При отсутствии данных по ИНН возвращается ошибка уровня домена (поставщик с таким ИНН не найден, предложено добавить вручную).
+- Важно: публичный API `api-fns.ru` может ограничивать число запросов с одного IP-адреса. При необходимости вы можете завести собственный аккаунт на `https://api-fns.ru/`.
+
+---
+
+## Запуск с Docker
+
+- В проекте есть `Dockerfile` и `docker-compose.yaml`.  
+- **Шаги:**
+  - Установить Docker и Docker Compose.
+  - В корне проекта выполнить:
+    - `docker compose up --build`
+  - Будут подняты:
+    - контейнер с PostgreSQL
+    - контейнер с приложением Spring Boot.
+- По умолчанию приложение доступно на порту **8080** (`http://localhost:8080`).  
+- Все миграции/схемы формируются автоматически через JPA по сущностям.
+
