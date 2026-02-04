@@ -3,6 +3,7 @@ package com.batu.supply_management_test_task.controller;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,12 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import com.batu.supply_management_test_task.dto.ProductDTO;
 import com.batu.supply_management_test_task.dto.ProductRequestDTO;
 import com.batu.supply_management_test_task.service.ProductService;
 
 @RestController
 @RequestMapping("/api/v1/product")
+@Validated
 public class ProductController {
     private final ProductService productService;
 
@@ -31,13 +34,13 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductRequestDTO request) {
+    public ResponseEntity<ProductDTO> createProduct(@Valid @RequestBody ProductRequestDTO request) {
         return ResponseEntity.ok(productService.createProduct(request));
     }
 
     @PatchMapping("/{productId}")
     public ResponseEntity<ProductDTO> updateProductById(@PathVariable UUID productId,
-            @RequestBody ProductRequestDTO request) {
+            @Valid @RequestBody ProductRequestDTO request) {
         return ResponseEntity.ok(productService.updateProductById(productId, request));
     }
 
