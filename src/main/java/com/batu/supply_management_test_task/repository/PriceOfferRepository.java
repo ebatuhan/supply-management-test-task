@@ -39,3 +39,4 @@ public interface PriceOfferRepository extends JpaRepository<PriceOffer, UUID> {
                         @Param("validTo") LocalDate validTo);
 
 }
+                                                                                                                                                                                                                

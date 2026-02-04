@@ -3,14 +3,19 @@ spring:
     name: supply-management-test-task
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/supply_management
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/supply_management}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: postgres
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 5
 
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     show-sql: true
     defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
