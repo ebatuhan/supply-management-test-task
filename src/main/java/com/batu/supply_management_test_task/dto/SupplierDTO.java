@@ -5,6 +5,6 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record SupplierDTO(UUID supplierId,String supplierName, String supplierType, String taxIdNumber) {
+public record SupplierDTO(UUID supplierId,String supplierName, String taxIdNumber) {
 
 }

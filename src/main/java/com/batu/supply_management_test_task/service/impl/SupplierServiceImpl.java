@@ -45,8 +45,7 @@ public class SupplierServiceImpl implements SupplierService {
 
         supplier.setSupplierName(
                 Optional.ofNullable(request.supplierName()).orElse(supplier.getSupplierName()));
-        supplier.setSupplierType(
-                Optional.ofNullable(request.supplierType()).orElse(supplier.getSupplierType()));
+       
         supplier.setTaxIdNumber(
                 Optional.ofNullable(request.taxIdNumber()).orElse(supplier.getTaxIdNumber()));
 
@@ -69,7 +68,6 @@ public class SupplierServiceImpl implements SupplierService {
     public SupplierDTO createSupplier(SupplierRequestDTO request) {
         Supplier supplierToAdd = Supplier.builder()
                 .supplierName(request.supplierName())
-                .supplierType(request.supplierType())
                 .taxIdNumber(request.taxIdNumber())
                 .build();
 

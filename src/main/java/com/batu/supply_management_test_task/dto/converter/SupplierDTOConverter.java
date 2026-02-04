@@ -12,7 +12,6 @@ public class SupplierDTOConverter {
         return SupplierDTO.builder()
                 .supplierId(from.getSupplierId())
                 .supplierName(from.getSupplierName())
-                .supplierType(from.getSupplierType())
                 .taxIdNumber(from.getTaxIdNumber())
                 .build();
     }

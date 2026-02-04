@@ -25,8 +25,6 @@ public class Supplier {
     @Column(nullable = false)
     private String supplierName;
 
-    @Column(nullable =  false)
-    private String supplierType;
 
     @Column(nullable = false, unique = true)
     private String taxIdNumber; //Номер ИНН
