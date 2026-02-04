@@ -13,17 +13,21 @@ import org.springframework.stereotype.Service;
 import com.batu.supply_management_test_task.dto.DeliveryReportDTO;
 import com.batu.supply_management_test_task.dto.ProductReportDTO;
 import com.batu.supply_management_test_task.dto.SupplierReportDTO;
+import com.batu.supply_management_test_task.factory.FileExportFactory;
+import com.batu.supply_management_test_task.model.FileExport;
 import com.batu.supply_management_test_task.repository.DeliveryRepository;
 import com.batu.supply_management_test_task.repository.projection.DeliveryReportProjection;
 import com.batu.supply_management_test_task.service.ReportService;
+import com.batu.supply_management_test_task.strategy.FileExportStrategy;
 
 @Service
 public class ReportServiceImpl implements ReportService {
 
     private final DeliveryRepository deliveryRepository;
-
-    public ReportServiceImpl(DeliveryRepository deliveryRepository) {
+    private final FileExportFactory exportFactory;
+    public ReportServiceImpl(DeliveryRepository deliveryRepository, FileExportFactory exportFactory) {
         this.deliveryRepository = deliveryRepository;
+        this.exportFactory = exportFactory;
     }
 
     @Override
@@ -70,5 +74,14 @@ public class ReportServiceImpl implements ReportService {
                 .grandTotalWeight(grandTotalWeight)
                 .grandTotalCost(grandTotalCost)
                 .build();
+    }
+
+    @Override
+    public FileExport exportReportForPeriod(LocalDate starDate, LocalDate endDate, String fileType) {
+
+        var report = getReportForPeriod(starDate, endDate);
+
+        final FileExportStrategy exportStrategy = exportFactory.getStrategy(fileType);
+        return exportStrategy.export(report);
     }
 }
